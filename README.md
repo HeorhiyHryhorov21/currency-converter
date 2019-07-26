@@ -11,8 +11,6 @@ Features
 * Comes with custom rate model ready to go
 * Customizable MySQL version
 
-* Integration with Sentry_ for error logging
-
 .. _Bootstrap: https://github.com/twbs/bootstrap
 
 Constraints
