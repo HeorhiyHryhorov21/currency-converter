@@ -1,0 +1,66 @@
+{% load static from staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="icon" href="{% static 'money_icon.png'%}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">    
+    <link href="https://unpkg.com/gijgo@1.9.13/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{% static 'style.css'%}">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/gijgo@1.9.13/js/gijgo.min.js" type="text/javascript"></script>
+    <title>Currency Exchange</title>
+</head>
+<body>
+    <header>
+        <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
+                <a class="navbar-brand" href="/">
+                    <img src="{%static 'money_icon.png'%}" width="30" height="30" alt="">
+                    Currency Rates
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarText">
+                  <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                      <a class="nav-link" href="{% url 'index' %}">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="{% url 'currency_table' %}">Currency rates table</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link" href="{% url 'saved_rates:saved_rates' %}">Saved rates</a>
+                    </li>
+                  </ul>
+                  <ul class="nav navbar-nav ml-auto">
+                    <li class="nav-item">
+                    {% if user.is_authenticated %}
+                    <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
+                    {% else %}
+                      <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+                      {% endif %}
+                    </li>
+
+                    <li class="nav-item">
+                        {% if user.is_authenticated %}
+                        
+                        {% else %}
+                          <a class="nav-link" href="{% url 'accounts:signup' %}">Signup</a>
+                          {% endif %}
+                        </li>
+                  </ul>
+                </div>
+        </nav>
+    </header>
+<div class="container">
+    {% block content %}
+    {% endblock %}
+</div>
+<script defer src="{% static 'script.js'%}"></script>
+</body>
+</html>

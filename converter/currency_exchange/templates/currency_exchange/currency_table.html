@@ -1,0 +1,160 @@
+{% extends 'currency_exchange/layout.html'%}
+
+{% block content%}
+<div class="row main-content">
+        <div class="col">
+                <form action="" method="POST" class="form-group" id="exchange_form">
+                        {% csrf_token %}
+                    <h2 class="heading">From</h2>
+                    <select name="from_convert" id="from_convert" class="form-control border border-dark">
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                        <option value="RUB">RUB</option>
+                        <option value="UAH">UAH</option>
+                    </select>
+        </div>
+        <div class="col">
+                    <h2 class="heading">To</h2>
+                    <select name="to_convert" id="to_convert" class="form-control border border-dark">
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                        <option value="RUB">RUB</option>
+                        <option value="UAH">UAH</option> 
+                    </select>
+        </div>
+        <div class="col">
+                    <h2 class="heading">Pick a start date</h2>
+                    <input id="datepicker_start"/>
+        </div>
+
+        <div class="col">
+                <h2 class="heading">Pick an end date</h2>
+                <input id="datepicker_end"/>
+        </div>
+            <div class="col-md-12">
+                    <input type="submit" name="submit" id="submit_button" class="form-control btn btn-primary" value="Submit">
+            </div>
+            <br><br>
+            </form>
+            <div class="col-md-12">
+                <form action="/db_save/" method="POST" class="form-group" id="db_save">{% csrf_token %}
+                    <input hidden type="text" name="text" value="">
+                    <input type="submit" name="submit" id="save-form" class="form-control btn btn-success" value="Save"></form>
+            </div>
+</div>
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Log in expected</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>You can't save a rate table without being logged in</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+<br><br>
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+    // make current page link active
+    $('.navbar-nav.mr-auto > li.nav-item:first').removeClass('active');
+    $('.navbar-nav.mr-auto > li.nav-item:nth-child(2)').addClass('active');
+});
+
+    // get a date that was week ago
+    let min_date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()-7);
+
+    // get current date
+    current_date = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+    
+    let current_day = new Date().getDate();
+    let current_month = new Date().getMonth() + 1;
+    let current_year = new Date().getFullYear();
+
+    // initialize start and end datepickers
+    $('#datepicker_start').datepicker({
+            uiLibrary: 'bootstrap4',iconsLibrary: 'fontawesome',
+            value: `${current_month}/${current_day-7}/${current_year}`,
+            footer: true, modal: true, header: true,
+            minDate: min_date,
+            maxDate: current_date
+    });
+
+    $('#datepicker_end').datepicker({
+            uiLibrary: 'bootstrap4',iconsLibrary: 'fontawesome',
+            value: `${current_month}/${current_day}/${current_year}`,
+            footer: true, modal: true, header: true,
+            minDate: min_date,
+            maxDate: current_date
+    });
+
+    // handling form submit
+    $(document).on('submit', '#exchange_form', (e) => {
+        e.preventDefault();
+
+        // get date from datepicker
+        $('.col-md-10').remove();
+
+        let from_convert = $('#from_convert').val();
+        let to_convert = $('#to_convert').val();
+
+        let start_date = $('#datepicker_start').val().split('/');
+        let start_day = start_date[1];
+        let start_month = start_date[0];
+        let start_year = start_date[2];
+
+
+        let end_date = $('#datepicker_end').val().split('/');
+        let end_day = end_date[1];
+        let end_month = end_date[0];
+        let end_year = end_date[2];
+        
+        // send ajax request to server side
+        $.ajax({
+            url: "/exchange_table/",
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+
+                from_convert: from_convert,
+                to_convert: to_convert,
+                start_day: start_day,
+                start_month: start_month,
+                start_year: start_year,
+
+                end_day: end_day,
+                end_month: end_month,
+                end_year: end_year
+            },
+            success: function(data) {
+                // initialize template for a table 
+                var template = '';
+                
+                // insert response data into table rows
+                for(var key in data) {
+                    template += `<tr class="date_row"><th scope="row" class="date">${key}</th><td class="currency_rate">${data[key]}</td></tr>`;
+                }
+
+                var text =`<div class="col-md-10 mx-auto"><table class="table table-bordered table-striped"><thead class="thead table-info"><tr><th scope="col">Date</th><th scope="col">1.00 ${from_convert} to ${to_convert}</th></tr></thead><tbody>${template}</tbody></table></div><br>`;
+                
+                // append table to body
+                $('body').append(text);
+
+                // append rows into hidden input
+                $('input[name=text]').val(text);
+            },
+        });
+    });
+</script>
+{% endblock %}

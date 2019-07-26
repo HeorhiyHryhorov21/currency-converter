@@ -1,0 +1,84 @@
+{% extends 'currency_exchange/layout.html'%}
+
+{% block content%}
+<div class="row main-content">
+    <div class="col-md-6">
+        <form action="" method="POST" class="form-group" id="exchange_table_form">
+            {% csrf_token %}
+            <h2 class="heading">From</h2>
+            <select name="from_convert" id="from_convert" class="form-control border border-dark">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="RUB">RUB</option>
+                <option value="UAH">UAH</option>
+            </select>
+            <h2 class="heading">To</h2>
+            <select name="to_convert" id="to_convert" class="form-control border border-dark">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="RUB">RUB</option>
+                <option value="UAH">UAH</option> 
+            </select>
+            <h2 class="heading">Pick a currency rate date</h2>
+            <input id="datepicker"/>
+        </div>
+            <div class="col-md-6">
+            
+            <h2 class="heading">Input amount</h2>
+            <input type="text" id="amount" class="form-control border border-dark">
+            <h2 class="heading">Output amount</h2>
+            <input type="text" id="output_amount" class="form-control border border-dark">
+            <br>
+            <input type="submit" name="submit" id="submit_button" class="form-control btn btn-primary" value="Submit">
+        </form>
+        </div>
+</div>
+<script type="text/javascript">
+
+    let today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+    let min_date = new Date(new Date().getFullYear()-1, new Date().getMonth(), new Date().getDate());
+    let current_day = new Date().getDate();
+    let current_month = new Date().getMonth() + 1;
+    let current_year = new Date().getFullYear();
+
+    $('#datepicker').datepicker({
+            uiLibrary: 'bootstrap4',iconsLibrary: 'fontawesome',
+            value: `${current_month}/${current_day}/${current_year}`,
+            footer: true, modal: true, header: true,
+            maxDate: today,
+            minDate: min_date,
+    });
+
+    $(document).on('submit', '#exchange_table_form', (e) => {
+        e.preventDefault();
+
+        // get date from datepicker
+
+        let date = $('#datepicker').val().split('/');
+        let day = date[1];
+        let month = date[0];
+        let year = date[2];
+
+
+        // send ajax request to server side
+        $.ajax({
+            url: "/exchange/",
+            type: "POST",
+            data: {
+                amount: $('#amount').val(),
+                from_convert: $('#from_convert').val(),
+                to_convert: $('#to_convert').val(),
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                day: day,
+                month: month,
+                year: year
+            },
+            success: function(data) {
+                // insert response data into input
+                $('input#output_amount').val(data);
+
+            },
+        });
+    });
+</script>
+{% endblock%}
